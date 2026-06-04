@@ -186,6 +186,8 @@ h1 .accent {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
+  display: flex;            /* column layout so actions can sink to the bottom */
+  flex-direction: column;
   transition: border-color .18s, transform .18s;
 }
 .card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
@@ -232,7 +234,9 @@ h1 .accent {
 }
 .card p { font-size: 13px; color: var(--muted); margin-top: 6px; min-height: 36px; }
 
-.card-actions { display: flex; gap: 8px; margin-top: 14px; }
+/* margin-top:auto pushes the buttons to the card's bottom edge, so they line
+   up across cards regardless of description length. */
+.card-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 14px; }
 .btn {
   font-family: inherit;
   font-size: 13px;
@@ -356,3 +360,53 @@ footer a:hover { color: var(--fg); }
   z-index: 60;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Persistent "Need a custom favicon?" contact card, anchored bottom-right.
+   .hidden is toggled by app.js when dismissed. */
+.contact {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  max-width: 280px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+  z-index: 55;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.contact.hidden {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+.contact-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+.contact-email {
+  font-size: 12.5px;
+  color: var(--primary-soft);
+  text-decoration: none;
+  word-break: break-all;
+}
+.contact-email:hover { color: var(--primary); text-decoration: underline; }
+.contact-close {
+  position: absolute;
+  top: 8px; right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--muted-2);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.contact-close:hover { color: var(--fg); }
+
+@media (max-width: 520px) {
+  .contact { left: 16px; right: 16px; bottom: 16px; max-width: none; }
+}

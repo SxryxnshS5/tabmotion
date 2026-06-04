@@ -367,6 +367,12 @@ function showToast() {
   toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 1800);
 }
 
+/* ---------- 7b. Contact card ------------------------------------------------ */
+// Dismiss the bottom-right "Need a custom favicon?" card.
+document.getElementById("contactClose").onclick = function () {
+  document.getElementById("contact").classList.add("hidden");
+};
+
 /* ---------- 8. Bootstrap + live site favicon -------------------------------- */
 render();  // initial paint of the grid
 
