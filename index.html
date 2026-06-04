@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>tabmotion — animated favicons</title>
+<meta name="description" content="A minimal library of modern, animated, copy-paste favicons for the browser tab." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-soft: #0c0c0f;
+    --card: #0e0e12;
+    --border: #1f1f24;
+    --border-strong: #2a2a31;
+    --fg: #fafafa;
+    --muted: #8a8a94;
+    --muted-2: #5f5f68;
+    --primary: #a855f7;
+    --primary-soft: #c084fc;
+    --primary-dim: rgba(168, 85, 247, 0.12);
+    --radius: 14px;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* ambient glow */
+  body::before {
+    content: "";
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    width: 900px;
+    height: 600px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.18), transparent 60%);
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    text-align: center;
+    padding: 96px 0 40px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--muted);
+    border: 1px solid var(--border-strong);
+    background: var(--bg-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 28px;
+  }
+  .badge .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+  }
+  h1 {
+    font-size: clamp(48px, 9vw, 84px);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    background: linear-gradient(180deg, #fff 30%, #b9b9c4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  h1 .accent {
+    background: linear-gradient(180deg, var(--primary-soft), var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .tagline {
+    margin: 22px auto 0;
+    max-width: 540px;
+    font-size: 17px;
+    color: var(--muted);
+  }
+
+  /* ---------- controls ---------- */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    margin: 44px 0 36px;
+  }
+  .search {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+  }
+  .search svg {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted-2);
+  }
+  .search input {
+    width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    font-size: 14.5px;
+    font-family: inherit;
+    padding: 12px 16px 12px 42px;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .search input::placeholder { color: var(--muted-2); }
+  .search input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-dim);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chip {
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    padding: 7px 15px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .chip:hover { color: var(--fg); border-color: #3a3a42; }
+  .chip.active {
+    color: #fff;
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+
+  /* ---------- grid ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+    padding-bottom: 40px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    transition: border-color .18s, transform .18s;
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+
+  /* browser-tab mock holding the live favicon */
+  .tab-mock {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+  }
+  .tab-mock canvas {
+    width: 22px; height: 22px;
+    flex-shrink: 0;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  .tab-mock .tab-title {
+    font-size: 12.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tab-mock .tab-x {
+    margin-left: auto;
+    color: var(--muted-2);
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card h3 { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .cat {
+    font-size: 11px;
+    color: var(--primary-soft);
+    background: var(--primary-dim);
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .card p { font-size: 13px; color: var(--muted); margin-top: 6px; min-height: 36px; }
+
+  .card-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 9px;
+    padding: 9px 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .btn-primary { flex: 1; background: var(--fg); color: #000; }
+  .btn-primary:hover { background: #d4d4d8; }
+  .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border-strong); }
+  .btn-ghost:hover { color: var(--fg); border-color: #3a3a42; }
+
+  .empty { grid-column: 1 / -1; text-align: center; color: var(--muted-2); padding: 60px 0; }
+
+  /* ---------- modal ---------- */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, .7);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 50;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-head canvas { width: 26px; height: 26px; }
+  .modal-head .mh-text h3 { font-size: 16px; font-weight: 600; }
+  .modal-head .mh-text span { font-size: 12.5px; color: var(--muted); }
+  .modal-head .close {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+  .modal-head .close:hover { color: var(--fg); background: var(--border); }
+
+  .code-wrap { position: relative; overflow: auto; padding: 20px; }
+  .code-wrap pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #d6d6dd;
+    white-space: pre;
+  }
+  .code-wrap .tok-c { color: #6b6b76; }       /* comment */
+  .code-wrap .tok-k { color: var(--primary-soft); } /* keyword */
+  .code-wrap .tok-s { color: #7fd1a8; }       /* string */
+  .code-wrap .tok-t { color: #f0a868; }       /* tag */
+
+  .modal-foot {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .modal-foot .hint { font-size: 12.5px; color: var(--muted-2); }
+  .modal-foot .btn-primary { flex: none; min-width: 150px; }
+
+  footer {
+    text-align: center;
+    color: var(--muted-2);
+    font-size: 13px;
+    padding: 50px 0 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--fg); }
+
+  .toast {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--primary);
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 11px 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(168,85,247,.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s ease;
+    z-index: 60;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="badge"><span class="dot"></span> 5 favicons · copy &amp; paste · zero dependencies</div>
+      <h1>tab<span class="accent">motion</span></h1>
+      <p class="tagline">Modern animated favicons for your browser tab. Pick one, copy the snippet, paste before <code>&lt;/head&gt;</code>. That's it.</p>
+    </header>
+
+    <div class="controls">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search" type="text" placeholder="Search favicons…" autocomplete="off" />
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <footer>
+      <p>tabmotion · built with vanilla canvas, no dependencies · works in every modern browser</p>
+    </footer>
+  </div>
+
+  <!-- code modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <canvas id="modalCanvas" width="64" height="64"></canvas>
+        <div class="mh-text">
+          <h3 id="modalName"></h3>
+          <span id="modalCat"></span>
+        </div>
+        <button class="close" id="modalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="code-wrap"><pre id="modalCode"></pre></div>
+      <div class="modal-foot">
+        <span class="hint">Paste this anywhere inside your page's <code>&lt;head&gt;</code> or before <code>&lt;/body&gt;</code>.</span>
+        <button class="btn btn-primary" id="modalCopy">Copy code</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard ✓</div>
+
+<script>
+/* =========================================================================
+   tabmotion — favicon registry
+   Each favicon has a `body` that draws ONE frame onto a 64x64 context `x`
+   at time `t` (seconds). This single source of truth powers BOTH the live
+   on-page preview AND the generated copy-paste snippet, so they always match.
+   ========================================================================= */
+
+var FAVICONS = [
+  {
+    id: "tabmotion",
+    name: "tabmotion",
+    category: "Brand",
+    desc: "The tabmotion mark — a highlight that glides between tabs. This is the favicon on this very tab.",
+    body:
+"  var w = 34, h = 7, bx = 15, r = 3.5;\n" +
+"  var rows = [20, 32, 44];\n" +
+"  x.fillStyle = 'rgba(168,85,247,0.16)';\n" +
+"  for (var i = 0; i < 3; i++) {\n" +
+"    x.beginPath();\n" +
+"    x.roundRect(bx, rows[i] - h / 2, w, h, r);\n" +
+"    x.fill();\n" +
+"  }\n" +
+"  var m = (t * 0.9) % 2;\n" +
+"  var tri = m < 1 ? m : 2 - m;\n" +
+"  var e = tri * tri * (3 - 2 * tri);\n" +
+"  var cy = 20 + e * 24;\n" +
+"  x.fillStyle = '#a855f7';\n" +
+"  x.beginPath();\n" +
+"  x.roundRect(bx, cy - h / 2, w, h, r);\n" +
+"  x.fill();"
+  },
+  {
+    id: "pulse",
+    name: "Pulse",
+    category: "Notification",
+    desc: "A glowing dot emitting expanding rings. Great for alerts & live status.",
+    body:
+"  var cx = 32, cy = 32;\n" +
+"  for (var i = 0; i < 3; i++) {\n" +
+"    var p = (t * 0.8 + i / 3) % 1;\n" +
+"    x.beginPath();\n" +
+"    x.arc(cx, cy, 9 + p * 21, 0, 7);\n" +
+"    x.strokeStyle = 'rgba(168,85,247,' + (1 - p) + ')';\n" +
+"    x.lineWidth = 3;\n" +
+"    x.stroke();\n" +
+"  }\n" +
+"  x.beginPath();\n" +
+"  x.arc(cx, cy, 10, 0, 7);\n" +
+"  x.fillStyle = '#a855f7';\n" +
+"  x.fill();"
+  },
+  {
+    id: "spinner",
+    name: "Spinner",
+    category: "Loading",
+    desc: "A clean rotating arc on a track ring. The classic loading indicator.",
+    body:
+"  var cx = 32, cy = 32, r = 22;\n" +
+"  x.beginPath();\n" +
+"  x.arc(cx, cy, r, 0, 7);\n" +
+"  x.strokeStyle = 'rgba(168,85,247,0.2)';\n" +
+"  x.lineWidth = 7;\n" +
+"  x.stroke();\n" +
+"  var a = t * 4.5;\n" +
+"  x.beginPath();\n" +
+"  x.arc(cx, cy, r, a, a + 1.9);\n" +
+"  x.strokeStyle = '#a855f7';\n" +
+"  x.lineWidth = 7;\n" +
+"  x.lineCap = 'round';\n" +
+"  x.stroke();"
+  },
+  {
+    id: "orbit",
+    name: "Orbit",
+    category: "Loading",
+    desc: "Two satellites circling a core. Smooth, hypnotic, always-in-motion.",
+    body:
+"  var cx = 32, cy = 32, r = 19;\n" +
+"  x.beginPath();\n" +
+"  x.arc(cx, cy, 6, 0, 7);\n" +
+"  x.fillStyle = '#c084fc';\n" +
+"  x.fill();\n" +
+"  for (var i = 0; i < 2; i++) {\n" +
+"    var a = t * 3 + i * Math.PI;\n" +
+"    var px = cx + Math.cos(a) * r;\n" +
+"    var py = cy + Math.sin(a) * r;\n" +
+"    x.beginPath();\n" +
+"    x.arc(px, py, 5.5, 0, 7);\n" +
+"    x.fillStyle = i ? '#7c3aed' : '#a855f7';\n" +
+"    x.fill();\n" +
+"  }"
+  },
+  {
+    id: "bounce",
+    name: "Bounce",
+    category: "Fun",
+    desc: "A playful ball with a squash-and-stretch bounce and soft shadow.",
+    body:
+"  var cx = 32;\n" +
+"  var p = Math.abs(Math.sin(t * 3.2));\n" +
+"  var y = 18 + (1 - p) * 26;\n" +
+"  var sh = 0.4 + (1 - p) * 0.6;\n" +
+"  x.beginPath();\n" +
+"  x.ellipse(cx, 52, 11 * sh, 3.5, 0, 0, 7);\n" +
+"  x.fillStyle = 'rgba(168,85,247,0.22)';\n" +
+"  x.fill();\n" +
+"  var squash = p < 0.12 ? (0.12 - p) * 18 : 0;\n" +
+"  x.beginPath();\n" +
+"  x.ellipse(cx, y, 11 + squash, 11 - squash, 0, 0, 7);\n" +
+"  x.fillStyle = '#a855f7';\n" +
+"  x.fill();"
+  },
+  {
+    id: "equalizer",
+    name: "Equalizer",
+    category: "Media",
+    desc: "Dancing audio bars. Perfect for music, podcasts & anything playing.",
+    body:
+"  var n = 4, w = 8, gap = 4;\n" +
+"  var total = n * w + (n - 1) * gap;\n" +
+"  var sx = (64 - total) / 2;\n" +
+"  x.fillStyle = '#a855f7';\n" +
+"  for (var i = 0; i < n; i++) {\n" +
+"    var h = 16 + Math.abs(Math.sin(t * 4 + i * 0.9)) * 32;\n" +
+"    var bx = sx + i * (w + gap);\n" +
+"    var by = (64 - h) / 2;\n" +
+"    x.beginPath();\n" +
+"    x.roundRect(bx, by, w, h, 4);\n" +
+"    x.fill();\n" +
+"  }"
+  }
+];
+
+/* ---------- build the standalone copy-paste snippet from a body ---------- */
+function buildSnippet(fav) {
+  return (
+"<!-- tabmotion: " + fav.name + "  —  https://tabmotion -->\n" +
+"<script>\n" +
+"(function () {\n" +
+"  var c = document.createElement('canvas');\n" +
+"  c.width = c.height = 64;\n" +
+"  var x = c.getContext('2d');\n" +
+"  var link = document.querySelector(\"link[rel~='icon']\");\n" +
+"  if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }\n" +
+"  var last = 0;\n" +
+"  function draw(x, t) {\n" +
+fav.body + "\n" +
+"  }\n" +
+"  function loop(now) {\n" +
+"    requestAnimationFrame(loop);\n" +
+"    if (now - last < 66) return;   // throttle to ~15fps\n" +
+"    last = now;\n" +
+"    x.clearRect(0, 0, 64, 64);\n" +
+"    draw(x, now / 1000);\n" +
+"    link.href = c.toDataURL('image/png');\n" +
+"  }\n" +
+"  requestAnimationFrame(loop);\n" +
+"})();\n" +
+"<\/script>"
+  );
+}
+
+/* ---------- naive but pretty syntax highlighter for the modal ---------- */
+function highlight(code) {
+  var esc = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // comments (html + js line)
+  esc = esc.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="tok-c">$1</span>');
+  esc = esc.replace(/(\/\/[^\n]*)/g, '<span class="tok-c">$1</span>');
+  // strings
+  esc = esc.replace(/('[^'\n]*')/g, '<span class="tok-s">$1</span>');
+  // tags
+  esc = esc.replace(/(&lt;\/?script&gt;)/g, '<span class="tok-t">$1</span>');
+  // keywords
+  esc = esc.replace(/\b(function|var|return|if|for|new)\b/g, '<span class="tok-k">$1</span>');
+  return esc;
+}
+
+/* ---------- live preview renderer (shared draw logic) ---------- */
+function startPreview(canvas, fav) {
+  var x = canvas.getContext("2d");
+  var fn = new Function("x", "t", fav.body);
+  var last = 0;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (now - last < 33) return;   // ~30fps on-page, looks smooth
+    last = now;
+    x.clearRect(0, 0, 64, 64);
+    fn(x, now / 1000);
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- render grid ---------- */
+var grid = document.getElementById("grid");
+var searchInput = document.getElementById("search");
+var chipsEl = document.getElementById("chips");
+
+var categories = ["All"].concat(
+  FAVICONS.map(function (f) { return f.category; })
+          .filter(function (v, i, a) { return a.indexOf(v) === i; })
+);
+var activeCat = "All";
+var query = "";
+
+categories.forEach(function (cat) {
+  var b = document.createElement("button");
+  b.className = "chip" + (cat === "All" ? " active" : "");
+  b.textContent = cat;
+  b.onclick = function () {
+    activeCat = cat;
+    document.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+    b.classList.add("active");
+    render();
+  };
+  chipsEl.appendChild(b);
+});
+
+searchInput.addEventListener("input", function () {
+  query = this.value.toLowerCase().trim();
+  render();
+});
+
+function render() {
+  grid.innerHTML = "";
+  var list = FAVICONS.filter(function (f) {
+    var matchCat = activeCat === "All" || f.category === activeCat;
+    var matchQ = !query ||
+      f.name.toLowerCase().indexOf(query) > -1 ||
+      f.category.toLowerCase().indexOf(query) > -1 ||
+      f.desc.toLowerCase().indexOf(query) > -1;
+    return matchCat && matchQ;
+  });
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty">No favicons match your search.</div>';
+    return;
+  }
+
+  list.forEach(function (fav) {
+    var card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML =
+      '<div class="tab-mock">' +
+        '<canvas width="64" height="64"></canvas>' +
+        '<span class="tab-title">' + fav.name + ' — your site</span>' +
+        '<span class="tab-x">&times;</span>' +
+      '</div>' +
+      '<div class="card-head"><h3>' + fav.name + '</h3><span class="cat">' + fav.category + '</span></div>' +
+      '<p>' + fav.desc + '</p>' +
+      '<div class="card-actions">' +
+        '<button class="btn btn-primary">&lt;/&gt; View code</button>' +
+        '<button class="btn btn-ghost" title="Copy code">Copy</button>' +
+      '</div>';
+
+    var canvas = card.querySelector("canvas");
+    startPreview(canvas, fav);
+
+    var btns = card.querySelectorAll("button");
+    btns[0].onclick = function () { openModal(fav); };
+    btns[1].onclick = function () { copyText(buildSnippet(fav)); };
+
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- modal ---------- */
+var overlay = document.getElementById("overlay");
+var modalCanvas = document.getElementById("modalCanvas");
+var currentFav = null;
+
+function openModal(fav) {
+  currentFav = fav;
+  document.getElementById("modalName").textContent = fav.name;
+  document.getElementById("modalCat").textContent = fav.category + " favicon";
+  document.getElementById("modalCode").innerHTML = highlight(buildSnippet(fav));
+  overlay.classList.add("open");
+}
+
+// dedicated modal preview loop (follows whichever fav is currently open)
+(function () {
+  var x = modalCanvas.getContext("2d");
+  var last = 0;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (!overlay.classList.contains("open") || !currentFav) return;
+    if (now - last < 33) return;
+    last = now;
+    var fn = new Function("x", "t", currentFav.body);
+    x.clearRect(0, 0, 64, 64);
+    fn(x, now / 1000);
+  }
+  requestAnimationFrame(loop);
+})();
+
+function closeModal() { overlay.classList.remove("open"); currentFav = null; }
+document.getElementById("modalClose").onclick = closeModal;
+overlay.onclick = function (e) { if (e.target === overlay) closeModal(); };
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+document.getElementById("modalCopy").onclick = function () { if (currentFav) copyText(buildSnippet(currentFav)); };
+
+/* ---------- copy + toast ---------- */
+var toast = document.getElementById("toast");
+var toastTimer;
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(showToast, function () {
+    // fallback
+    var ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); showToast(); } catch (e) {}
+    document.body.removeChild(ta);
+  });
+}
+function showToast() {
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 1800);
+}
+
+render();
+
+/* ---------- tabmotion uses its own favicon, live ---------- */
+(function () {
+  var brand = FAVICONS[0]; // the "tabmotion" mark
+  var c = document.createElement("canvas");
+  c.width = c.height = 64;
+  var x = c.getContext("2d");
+  var fn = new Function("x", "t", brand.body);
+  var link = document.querySelector("link[rel~='icon']");
+  if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+  var last = 0;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (now - last < 66) return; // ~15fps
+    last = now;
+    x.clearRect(0, 0, 64, 64);
+    fn(x, now / 1000);
+    link.href = c.toDataURL("image/png");
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
