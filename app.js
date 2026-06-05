@@ -339,7 +339,7 @@ var FAVICONS = [
      dark  -> '#7c3aed'  (darker accent / gradients)
      rgb   -> '168,85,247' (used inside rgba(...) for translucent layers)      */
 var PALETTES = [
-  { name: "Purple",  main: "#a855f7", soft: "#c084fc", dark: "#7c3aed", rgb: "168,85,247" },
+  { name: "Purple",  main: "#800080", soft: "#ac59ac", dark: "#5a005a", rgb: "128,0,128" },
   { name: "Blue",    main: "#3b82f6", soft: "#60a5fa", dark: "#2563eb", rgb: "59,130,246" },
   { name: "Emerald", main: "#22c55e", soft: "#4ade80", dark: "#16a34a", rgb: "34,197,94" },
   { name: "Rose",    main: "#f43f5e", soft: "#fb7185", dark: "#e11d48", rgb: "244,63,94" },
@@ -551,7 +551,7 @@ customWrap.className = "swatch swatch-custom";
 customWrap.title = "Custom color";
 var picker = document.createElement("input");
 picker.type = "color";
-picker.value = "#a855f7";
+picker.value = "#800080";
 picker.addEventListener("input", function () { setColor(paletteFromHex(this.value)); });
 customWrap.appendChild(picker);
 swatchesEl.appendChild(customWrap);
