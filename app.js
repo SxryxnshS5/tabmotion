@@ -496,6 +496,19 @@ function stopPreviews() {
   activePreviews = [];
 }
 
+// The canvas + favicon for each card currently on screen. Lets us recolor
+// previews in place (without rebuilding the grid) when the palette changes.
+var currentCards = [];
+
+// Restart the on-screen previews with the active palette, leaving the DOM
+// untouched — so changing color never disturbs the scroll position.
+function recolorPreviews() {
+  stopPreviews();
+  currentCards.forEach(function (c) {
+    activePreviews.push(startPreview(c.canvas, c.fav));
+  });
+}
+
 // Render a clickable chip per category and wire up filtering.
 categories.forEach(function (cat) {
   var b = document.createElement("button");
@@ -519,7 +532,7 @@ var swatchesEl = document.getElementById("swatches");
 function setColor(palette) {
   currentPalette = palette;
   refreshSwatchActive();
-  render();  // rebuild card previews in the new color
+  recolorPreviews();  // re-tint cards in place (no DOM rebuild, no scroll jump)
   // If the modal is open, refresh its code so the snippet reflects the color.
   if (currentFav) {
     document.getElementById("modalCode").innerHTML = highlight(buildSnippet(currentFav));
@@ -584,7 +597,13 @@ function getFiltered() {
 
 // (Re)build the card grid + pagination for the current filters and page.
 function render() {
+  // Measure columns BEFORE emptying the grid. Reading layout on an empty grid
+  // makes the page momentarily short, which clamps the scroll position to the
+  // top — so we measure while the existing cards still hold the page height.
+  var pageSize = getPageSize();
+
   stopPreviews();
+  currentCards = [];
   grid.innerHTML = "";
   paginationEl.innerHTML = "";
 
@@ -596,7 +615,6 @@ function render() {
   }
 
   // Clamp the page to the available range, then slice out this page's items.
-  var pageSize = getPageSize();
   var totalPages = Math.ceil(filtered.length / pageSize);
   if (currentPage > totalPages) currentPage = totalPages;
   var start = (currentPage - 1) * pageSize;
@@ -619,9 +637,11 @@ function render() {
         '<button class="btn btn-ghost" title="Copy code">Copy</button>' +
       '</div>';
 
-    // Start the live favicon preview inside the faux tab (tracked for cleanup).
+    // Start the live favicon preview inside the faux tab (tracked for cleanup
+    // and for in-place recoloring).
     var canvas = card.querySelector("canvas");
     activePreviews.push(startPreview(canvas, fav));
+    currentCards.push({ canvas: canvas, fav: fav });
 
     // [0] = view code, [1] = open tab preview, [2] = copy the snippet directly.
     var btns = card.querySelectorAll("button");
