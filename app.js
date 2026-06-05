@@ -327,6 +327,66 @@ var FAVICONS = [
   }
 ];
 
+/* ---------- 1b. Color theming ----------------------------------------------
+   Favicon `body` strings are authored in the default purple palette. To
+   recolor a favicon we string-replace that palette's literals with another
+   color's equivalents — so a single set of presets (or a custom picker)
+   re-themes every favicon, preview, snippet, and the live site icon.
+
+   Each palette needs four values matching the literals used in the bodies:
+     main  -> '#a855f7'  (primary fills/strokes)
+     soft  -> '#c084fc'  (lighter accent)
+     dark  -> '#7c3aed'  (darker accent / gradients)
+     rgb   -> '168,85,247' (used inside rgba(...) for translucent layers)      */
+var PALETTES = [
+  { name: "Purple",  main: "#a855f7", soft: "#c084fc", dark: "#7c3aed", rgb: "168,85,247" },
+  { name: "Blue",    main: "#3b82f6", soft: "#60a5fa", dark: "#2563eb", rgb: "59,130,246" },
+  { name: "Emerald", main: "#22c55e", soft: "#4ade80", dark: "#16a34a", rgb: "34,197,94" },
+  { name: "Rose",    main: "#f43f5e", soft: "#fb7185", dark: "#e11d48", rgb: "244,63,94" },
+  { name: "Amber",   main: "#f59e0b", soft: "#fbbf24", dark: "#d97706", rgb: "245,158,11" },
+  { name: "Cyan",    main: "#06b6d4", soft: "#22d3ee", dark: "#0891b2", rgb: "6,182,212" },
+  { name: "Mono",    main: "#fafafa", soft: "#ffffff", dark: "#d4d4d8", rgb: "250,250,250" }
+];
+
+var currentPalette = PALETTES[0];  // active color (replaced wholesale on change)
+
+// Swap the default purple literals in a body for the active palette's colors.
+function themed(body) {
+  var p = currentPalette;
+  return body
+    .split("#a855f7").join(p.main)
+    .split("#c084fc").join(p.soft)
+    .split("#7c3aed").join(p.dark)
+    .split("rgba(168,85,247,").join("rgba(" + p.rgb + ",");
+}
+
+// --- helpers to derive a full palette from a single picked hex color --------
+function hexToRgb(hex) {
+  hex = hex.replace("#", "");
+  if (hex.length === 3) hex = hex.split("").map(function (c) { return c + c; }).join("");
+  var n = parseInt(hex, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function rgbToHex(rgb) {
+  return "#" + rgb.map(function (v) {
+    return Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  }).join("");
+}
+function mix(rgb, target, amt) {
+  return rgb.map(function (v, i) { return v + (target[i] - v) * amt; });
+}
+// Build {main,soft,dark,rgb} from any hex: soft = lighter, dark = darker.
+function paletteFromHex(hex) {
+  var rgb = hexToRgb(hex);
+  return {
+    name: "Custom",
+    main: hex,
+    soft: rgbToHex(mix(rgb, [255, 255, 255], 0.35)),
+    dark: rgbToHex(mix(rgb, [0, 0, 0], 0.30)),
+    rgb: rgb.join(",")
+  };
+}
+
 /* ---------- 2. Snippet builder ---------------------------------------------
    Wraps a favicon's `body` in a self-contained, copy-paste-ready <script>.
    The generated code creates its own off-screen canvas, finds (or creates)
@@ -343,7 +403,7 @@ function buildSnippet(fav) {
 "  if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }\n" +
 "  var last = 0;\n" +
 "  function draw(x, t) {\n" +
-fav.body + "\n" +
+themed(fav.body) + "\n" +   // bake the currently selected color into the snippet
 "  }\n" +
 "  function loop(now) {\n" +
 "    requestAnimationFrame(loop);\n" +
@@ -386,7 +446,7 @@ function highlight(code) {
    loops that paint to detached canvases.                                     */
 function startPreview(canvas, fav) {
   var x = canvas.getContext("2d");
-  var fn = new Function("x", "t", fav.body);
+  var fn = new Function("x", "t", themed(fav.body));
   var last = 0, raf;
   function loop(now) {
     raf = requestAnimationFrame(loop);
@@ -450,6 +510,51 @@ categories.forEach(function (cat) {
   };
   chipsEl.appendChild(b);
 });
+
+/* ----- Color swatches: preset palettes + a custom picker -------------------
+   Changing the color re-themes the whole page: card previews, the open modal
+   (preview + code), and the live site favicon all read `currentPalette`.     */
+var swatchesEl = document.getElementById("swatches");
+
+function setColor(palette) {
+  currentPalette = palette;
+  refreshSwatchActive();
+  render();  // rebuild card previews in the new color
+  // If the modal is open, refresh its code so the snippet reflects the color.
+  if (currentFav) {
+    document.getElementById("modalCode").innerHTML = highlight(buildSnippet(currentFav));
+  }
+  // The site-favicon loop recompiles itself when it sees the palette changed.
+}
+
+function refreshSwatchActive() {
+  document.querySelectorAll("#swatches .swatch").forEach(function (s) {
+    s.classList.toggle("active", s.dataset.main === currentPalette.main);
+  });
+}
+
+// One round swatch per preset palette.
+PALETTES.forEach(function (p) {
+  var b = document.createElement("button");
+  b.className = "swatch" + (p.main === currentPalette.main ? " active" : "");
+  b.style.background = p.main;
+  b.dataset.main = p.main;
+  b.title = p.name;
+  b.setAttribute("aria-label", p.name);
+  b.onclick = function () { setColor(p); };
+  swatchesEl.appendChild(b);
+});
+
+// Custom color picker: a rainbow swatch wrapping a hidden <input type=color>.
+var customWrap = document.createElement("label");
+customWrap.className = "swatch swatch-custom";
+customWrap.title = "Custom color";
+var picker = document.createElement("input");
+picker.type = "color";
+picker.value = "#a855f7";
+picker.addEventListener("input", function () { setColor(paletteFromHex(this.value)); });
+customWrap.appendChild(picker);
+swatchesEl.appendChild(customWrap);
 
 // Live search: re-render on every keystroke (and reset to page 1).
 searchInput.addEventListener("input", function () {
@@ -577,7 +682,7 @@ function openModal(fav) {
     if (!overlay.classList.contains("open") || !currentFav) return;
     if (now - last < 33) return;
     last = now;
-    var fn = new Function("x", "t", currentFav.body);
+    var fn = new Function("x", "t", themed(currentFav.body));
     x.clearRect(0, 0, 64, 64);
     fn(x, now / 1000);
   }
@@ -627,14 +732,17 @@ render();  // initial paint of the grid
   var c = document.createElement("canvas");
   c.width = c.height = 64;
   var x = c.getContext("2d");
-  var fn = new Function("x", "t", brand.body);
   var link = document.querySelector("link[rel~='icon']");
   if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
-  var last = 0;
+  var last = 0, compiledFor = null, fn = null;
   function loop(now) {
     requestAnimationFrame(loop);
     if (now - last < 66) return; // ~15fps
     last = now;
+    if (compiledFor !== currentPalette) {           // recompile when color changes
+      fn = new Function("x", "t", themed(brand.body));
+      compiledFor = currentPalette;
+    }
     x.clearRect(0, 0, 64, 64);
     fn(x, now / 1000);
     link.href = c.toDataURL("image/png");

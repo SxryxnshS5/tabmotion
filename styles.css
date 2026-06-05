@@ -174,6 +174,47 @@ h1 .accent {
   border-color: var(--primary);
 }
 
+/* Color swatches: preset palettes + custom picker. Built by app.js. */
+.swatches {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 2px;
+}
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  outline: 2px solid transparent;   /* becomes the active ring */
+  outline-offset: 2px;
+  padding: 0;
+  cursor: pointer;
+  transition: transform .12s, outline-color .15s;
+}
+.swatch:hover { transform: scale(1.15); }
+.swatch.active { outline-color: var(--fg); }
+
+/* Custom picker swatch: a rainbow disc hiding the native color input. */
+.swatch-custom {
+  position: relative;
+  overflow: hidden;
+  background: conic-gradient(#f43f5e, #f59e0b, #22c55e, #06b6d4, #3b82f6, #a855f7, #f43f5e);
+  display: inline-flex;
+}
+.swatch-custom input[type="color"] {
+  position: absolute;
+  inset: -6px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;   /* the disc shows through; the input just captures clicks */
+}
+
 /* ---------- 5. Grid + favicon cards ---------------------------------------- */
 .grid {
   display: grid;
