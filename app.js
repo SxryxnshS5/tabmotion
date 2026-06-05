@@ -161,6 +161,169 @@ var FAVICONS = [
 "    x.roundRect(bx, by, w, h, 4);\n" +
 "    x.fill();\n" +
 "  }"
+  },
+  {
+    id: "heartbeat",
+    name: "Heartbeat",
+    category: "Fun",
+    desc: "A heart with a lively double-thump pulse. Friendly and full of life.",
+    body:
+"  var b = Math.sin(t * 5);\n" +
+"  var s = 1 + (b > 0 ? b * b * 0.22 : 0);\n" +
+"  x.save();\n" +
+"  x.translate(32, 30);\n" +
+"  x.scale(s, s);\n" +
+"  x.beginPath();\n" +
+"  x.moveTo(0, 14);\n" +
+"  x.bezierCurveTo(-18, -2, -10, -20, 0, -8);\n" +
+"  x.bezierCurveTo(10, -20, 18, -2, 0, 14);\n" +
+"  x.closePath();\n" +
+"  x.fillStyle = '#a855f7';\n" +
+"  x.fill();\n" +
+"  x.restore();"
+  },
+  {
+    id: "progress",
+    name: "Progress Ring",
+    category: "Loading",
+    desc: "A ring that fills from empty to full and loops. Great for uploads.",
+    body:
+"  var cx = 32, cy = 32, r = 21;\n" +
+"  x.beginPath();\n" +
+"  x.arc(cx, cy, r, 0, 7);\n" +
+"  x.strokeStyle = 'rgba(168,85,247,0.18)';\n" +
+"  x.lineWidth = 7;\n" +
+"  x.stroke();\n" +
+"  var p = (t * 0.5) % 1;\n" +
+"  x.beginPath();\n" +
+"  x.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2);\n" +
+"  x.strokeStyle = '#a855f7';\n" +
+"  x.lineWidth = 7;\n" +
+"  x.lineCap = 'round';\n" +
+"  x.stroke();"
+  },
+  {
+    id: "dots",
+    name: "Typing Dots",
+    category: "Loading",
+    desc: "Three dots bouncing in sequence — the classic typing indicator.",
+    body:
+"  x.fillStyle = '#a855f7';\n" +
+"  for (var i = 0; i < 3; i++) {\n" +
+"    var off = Math.max(0, Math.sin(t * 5 - i * 0.6)) * 10;\n" +
+"    x.beginPath();\n" +
+"    x.arc(14 + i * 18, 32 - off, 6, 0, 7);\n" +
+"    x.fill();\n" +
+"  }"
+  },
+  {
+    id: "radar",
+    name: "Radar",
+    category: "Notification",
+    desc: "A sweeping radar beam over range rings. Signals active scanning.",
+    body:
+"  var cx = 32, cy = 32, r = 24;\n" +
+"  x.strokeStyle = 'rgba(168,85,247,0.18)';\n" +
+"  x.lineWidth = 2;\n" +
+"  x.beginPath(); x.arc(cx, cy, r, 0, 7); x.stroke();\n" +
+"  x.beginPath(); x.arc(cx, cy, r * 0.6, 0, 7); x.stroke();\n" +
+"  var a = t * 2.5;\n" +
+"  x.beginPath();\n" +
+"  x.moveTo(cx, cy);\n" +
+"  x.arc(cx, cy, r, a - 0.6, a);\n" +
+"  x.closePath();\n" +
+"  x.fillStyle = 'rgba(168,85,247,0.35)';\n" +
+"  x.fill();\n" +
+"  x.beginPath();\n" +
+"  x.moveTo(cx, cy);\n" +
+"  x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);\n" +
+"  x.strokeStyle = '#a855f7';\n" +
+"  x.lineWidth = 2.5;\n" +
+"  x.stroke();\n" +
+"  x.beginPath(); x.arc(cx, cy, 3, 0, 7); x.fillStyle = '#c084fc'; x.fill();"
+  },
+  {
+    id: "comet",
+    name: "Comet",
+    category: "Fun",
+    desc: "A dot orbiting with a glowing fading tail. Smooth and eye-catching.",
+    body:
+"  var cx = 32, cy = 32, r = 20;\n" +
+"  for (var i = 0; i < 10; i++) {\n" +
+"    var a = t * 3 - i * 0.12;\n" +
+"    var px = cx + Math.cos(a) * r;\n" +
+"    var py = cy + Math.sin(a) * r;\n" +
+"    x.beginPath();\n" +
+"    x.arc(px, py, 5 - i * 0.4, 0, 7);\n" +
+"    x.fillStyle = 'rgba(168,85,247,' + (1 - i / 10) + ')';\n" +
+"    x.fill();\n" +
+"  }"
+  },
+  {
+    id: "wave",
+    name: "Wave",
+    category: "Media",
+    desc: "A scrolling sine wave with a filled body. Ideal for audio & live data.",
+    body:
+"  var i, y;\n" +
+"  x.beginPath();\n" +
+"  x.moveTo(0, 64);\n" +
+"  for (i = 0; i <= 64; i += 4) {\n" +
+"    y = 32 + Math.sin(i * 0.2 + t * 3) * 10;\n" +
+"    x.lineTo(i, y);\n" +
+"  }\n" +
+"  x.lineTo(64, 64);\n" +
+"  x.closePath();\n" +
+"  x.fillStyle = 'rgba(168,85,247,0.35)';\n" +
+"  x.fill();\n" +
+"  x.beginPath();\n" +
+"  for (i = 0; i <= 64; i += 4) {\n" +
+"    y = 32 + Math.sin(i * 0.2 + t * 3) * 10;\n" +
+"    if (i === 0) x.moveTo(i, y); else x.lineTo(i, y);\n" +
+"  }\n" +
+"  x.strokeStyle = '#a855f7';\n" +
+"  x.lineWidth = 3;\n" +
+"  x.lineCap = 'round';\n" +
+"  x.stroke();"
+  },
+  {
+    id: "clock",
+    name: "Clock",
+    category: "Loading",
+    desc: "Sweeping clock hands on a soft dial. For timers and scheduling.",
+    body:
+"  var cx = 32, cy = 32, r = 22;\n" +
+"  x.beginPath(); x.arc(cx, cy, r, 0, 7);\n" +
+"  x.strokeStyle = 'rgba(168,85,247,0.25)'; x.lineWidth = 4; x.stroke();\n" +
+"  var ma = t * 3;\n" +
+"  x.beginPath(); x.moveTo(cx, cy);\n" +
+"  x.lineTo(cx + Math.cos(ma) * 16, cy + Math.sin(ma) * 16);\n" +
+"  x.strokeStyle = '#a855f7'; x.lineWidth = 4; x.lineCap = 'round'; x.stroke();\n" +
+"  var ha = t * 0.8;\n" +
+"  x.beginPath(); x.moveTo(cx, cy);\n" +
+"  x.lineTo(cx + Math.cos(ha) * 10, cy + Math.sin(ha) * 10);\n" +
+"  x.strokeStyle = '#c084fc'; x.lineWidth = 4; x.lineCap = 'round'; x.stroke();\n" +
+"  x.beginPath(); x.arc(cx, cy, 3, 0, 7); x.fillStyle = '#fff'; x.fill();"
+  },
+  {
+    id: "morph",
+    name: "Morph",
+    category: "Fun",
+    desc: "A shape spinning while it melts from square to circle and back.",
+    body:
+"  var s = 38;\n" +
+"  var rad = 4 + (Math.sin(t * 2) + 1) / 2 * 15;\n" +
+"  x.save();\n" +
+"  x.translate(32, 32);\n" +
+"  x.rotate(t * 1.2);\n" +
+"  x.beginPath();\n" +
+"  x.roundRect(-s / 2, -s / 2, s, s, rad);\n" +
+"  var g = x.createLinearGradient(-s / 2, -s / 2, s / 2, s / 2);\n" +
+"  g.addColorStop(0, '#c084fc');\n" +
+"  g.addColorStop(1, '#7c3aed');\n" +
+"  x.fillStyle = g;\n" +
+"  x.fill();\n" +
+"  x.restore();"
   }
 ];
 
@@ -217,25 +380,46 @@ function highlight(code) {
 /* ---------- 4. Live preview renderer ---------------------------------------
    Compiles a favicon's `body` into a function and animates it onto `canvas`.
    Used by every card preview. Throttled to ~30fps (smoother than the favicon
-   itself, which the browser only samples a few times per second).            */
+   itself, which the browser only samples a few times per second).
+   Returns a stop() handle so the loop can be cancelled when the card is
+   removed (e.g. on search, filter, or page change) — avoids leaking RAF
+   loops that paint to detached canvases.                                     */
 function startPreview(canvas, fav) {
   var x = canvas.getContext("2d");
   var fn = new Function("x", "t", fav.body);
-  var last = 0;
+  var last = 0, raf;
   function loop(now) {
-    requestAnimationFrame(loop);
+    raf = requestAnimationFrame(loop);
     if (now - last < 33) return;   // ~30fps on-page, looks smooth
     last = now;
     x.clearRect(0, 0, 64, 64);
     fn(x, now / 1000);
   }
-  requestAnimationFrame(loop);
+  raf = requestAnimationFrame(loop);
+  return function stop() { cancelAnimationFrame(raf); };
 }
 
-/* ---------- 5. Grid render + filtering -------------------------------------- */
+/* ---------- 5. Grid render + filtering + pagination ------------------------- */
 var grid = document.getElementById("grid");
 var searchInput = document.getElementById("search");
 var chipsEl = document.getElementById("chips");
+var paginationEl = document.getElementById("pagination");
+
+var ROWS_PER_PAGE = 2;   // how many full rows to show per page
+var currentPage = 1;     // active page (1-based)
+
+// Count the grid's current columns by reading its computed track list. The
+// grid uses `auto-fill`, so this reflects how many cards actually fit the
+// viewport — letting page size grow/shrink to always fill complete rows.
+function getColumns() {
+  var cols = getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length;
+  return Math.max(1, cols);
+}
+
+// Favicons per page = columns x rows, so pages never leave a half-empty row.
+function getPageSize() {
+  return getColumns() * ROWS_PER_PAGE;
+}
 
 // Build the category list as ["All", ...unique categories from FAVICONS].
 var categories = ["All"].concat(
@@ -245,6 +429,13 @@ var categories = ["All"].concat(
 var activeCat = "All";  // currently selected category chip
 var query = "";          // current search text (lowercased)
 
+// Active preview loops; cancelled before every re-render to avoid leaks.
+var activePreviews = [];
+function stopPreviews() {
+  activePreviews.forEach(function (stop) { stop(); });
+  activePreviews = [];
+}
+
 // Render a clickable chip per category and wire up filtering.
 categories.forEach(function (cat) {
   var b = document.createElement("button");
@@ -252,6 +443,7 @@ categories.forEach(function (cat) {
   b.textContent = cat;
   b.onclick = function () {
     activeCat = cat;
+    currentPage = 1;   // jump back to the first page when the filter changes
     document.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
     b.classList.add("active");
     render();
@@ -259,16 +451,23 @@ categories.forEach(function (cat) {
   chipsEl.appendChild(b);
 });
 
-// Live search: re-render on every keystroke.
+// Live search: re-render on every keystroke (and reset to page 1).
 searchInput.addEventListener("input", function () {
   query = this.value.toLowerCase().trim();
+  currentPage = 1;
   render();
 });
 
-// (Re)build the card grid from the current category + search filters.
-function render() {
-  grid.innerHTML = "";
-  var list = FAVICONS.filter(function (f) {
+// Re-render on resize (debounced) so the page size tracks the column count.
+var resizeTimer;
+window.addEventListener("resize", function () {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(render, 150);
+});
+
+// Return the favicons matching the current category + search filters.
+function getFiltered() {
+  return FAVICONS.filter(function (f) {
     var matchCat = activeCat === "All" || f.category === activeCat;
     var matchQ = !query ||
       f.name.toLowerCase().indexOf(query) > -1 ||
@@ -276,11 +475,27 @@ function render() {
       f.desc.toLowerCase().indexOf(query) > -1;
     return matchCat && matchQ;
   });
+}
 
-  if (!list.length) {
+// (Re)build the card grid + pagination for the current filters and page.
+function render() {
+  stopPreviews();
+  grid.innerHTML = "";
+  paginationEl.innerHTML = "";
+
+  var filtered = getFiltered();
+
+  if (!filtered.length) {
     grid.innerHTML = '<div class="empty">No favicons match your search.</div>';
     return;
   }
+
+  // Clamp the page to the available range, then slice out this page's items.
+  var pageSize = getPageSize();
+  var totalPages = Math.ceil(filtered.length / pageSize);
+  if (currentPage > totalPages) currentPage = totalPages;
+  var start = (currentPage - 1) * pageSize;
+  var list = filtered.slice(start, start + pageSize);
 
   list.forEach(function (fav) {
     var card = document.createElement("div");
@@ -298,9 +513,9 @@ function render() {
         '<button class="btn btn-ghost" title="Copy code">Copy</button>' +
       '</div>';
 
-    // Start the live favicon preview inside the faux tab.
+    // Start the live favicon preview inside the faux tab (tracked for cleanup).
     var canvas = card.querySelector("canvas");
-    startPreview(canvas, fav);
+    activePreviews.push(startPreview(canvas, fav));
 
     // [0] = open the code modal, [1] = copy the snippet directly.
     var btns = card.querySelectorAll("button");
@@ -309,6 +524,34 @@ function render() {
 
     grid.appendChild(card);
   });
+
+  renderPagination(totalPages);
+}
+
+// Build the prev / numbered / next controls. Hidden automatically when there
+// is only a single page (the container is empty, collapsed via CSS).
+function renderPagination(totalPages) {
+  if (totalPages <= 1) return;
+
+  function pageButton(label, page, opts) {
+    opts = opts || {};
+    var b = document.createElement("button");
+    b.className = "page-btn" + (opts.active ? " active" : "");
+    b.textContent = label;
+    if (opts.disabled) b.disabled = true;
+    else b.onclick = function () {
+      currentPage = page;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    return b;
+  }
+
+  paginationEl.appendChild(pageButton("‹", currentPage - 1, { disabled: currentPage === 1 }));
+  for (var p = 1; p <= totalPages; p++) {
+    paginationEl.appendChild(pageButton(String(p), p, { active: p === currentPage }));
+  }
+  paginationEl.appendChild(pageButton("›", currentPage + 1, { disabled: currentPage === totalPages }));
 }
 
 /* ---------- 6. Code modal --------------------------------------------------- */

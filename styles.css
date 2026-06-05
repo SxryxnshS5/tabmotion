@@ -259,6 +259,36 @@ h1 .accent {
 /* Shown when a search/filter returns nothing. */
 .empty { grid-column: 1 / -1; text-align: center; color: var(--muted-2); padding: 60px 0; }
 
+/* Pagination: numbered page buttons + prev/next. Built by app.js. */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 24px;
+}
+.pagination:empty { display: none; }   /* collapse when only one page */
+.page-btn {
+  font-family: inherit;
+  font-size: 13px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.page-btn:hover:not(:disabled) { color: var(--fg); border-color: #3a3a42; }
+.page-btn.active {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.page-btn:disabled { opacity: .4; cursor: default; }
+
 /* ---------- 6. Code modal -------------------------------------------------- */
 .overlay {
   position: fixed; inset: 0;
