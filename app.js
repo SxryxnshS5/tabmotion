@@ -615,6 +615,7 @@ function render() {
       '<p>' + fav.desc + '</p>' +
       '<div class="card-actions">' +
         '<button class="btn btn-primary">&lt;/&gt; View code</button>' +
+        '<button class="btn btn-ghost" title="Preview in a browser tab">Preview</button>' +
         '<button class="btn btn-ghost" title="Copy code">Copy</button>' +
       '</div>';
 
@@ -622,10 +623,11 @@ function render() {
     var canvas = card.querySelector("canvas");
     activePreviews.push(startPreview(canvas, fav));
 
-    // [0] = open the code modal, [1] = copy the snippet directly.
+    // [0] = view code, [1] = open tab preview, [2] = copy the snippet directly.
     var btns = card.querySelectorAll("button");
     btns[0].onclick = function () { openModal(fav); };
-    btns[1].onclick = function () { copyText(buildSnippet(fav)); };
+    btns[1].onclick = function () { openPreview(fav); };
+    btns[2].onclick = function () { copyText(buildSnippet(fav)); };
 
     grid.appendChild(card);
   });
@@ -694,6 +696,55 @@ document.getElementById("modalClose").onclick = closeModal;
 overlay.onclick = function (e) { if (e.target === overlay) closeModal(); }; // click backdrop to dismiss
 document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 document.getElementById("modalCopy").onclick = function () { if (currentFav) copyText(buildSnippet(currentFav)); };
+
+/* ---------- 6b. Tab preview -------------------------------------------------
+   A browser-window mock showing the chosen favicon live in a tab. The user
+   types their site name; the tab title and address bar update in real time.  */
+var previewOverlay = document.getElementById("previewOverlay");
+var previewCanvas = document.getElementById("previewCanvas");
+var previewInput = document.getElementById("previewInput");
+var previewTabTitle = document.getElementById("previewTabTitle");
+var previewAddr = document.getElementById("previewAddr");
+var currentPreviewFav = null;  // favicon shown in the preview (drives its loop)
+
+// Turn a site name into a tidy domain-ish slug for the fake address bar.
+function slugify(s) {
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "my-site";
+}
+
+// Sync the tab title + address bar from the input (falls back to "My Site").
+function applyPreviewName() {
+  previewTabTitle.textContent = previewInput.value.trim() || "My Site";
+  previewAddr.textContent = "https://" + slugify(previewInput.value) + ".com";
+}
+
+function openPreview(fav) {
+  currentPreviewFav = fav;
+  applyPreviewName();
+  previewOverlay.classList.add("open");
+}
+function closePreview() { previewOverlay.classList.remove("open"); currentPreviewFav = null; }
+
+previewInput.addEventListener("input", applyPreviewName);
+document.getElementById("previewClose").onclick = closePreview;
+previewOverlay.onclick = function (e) { if (e.target === previewOverlay) closePreview(); };
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePreview(); });
+
+// Long-lived loop: renders the active preview favicon, idles while closed.
+(function () {
+  var x = previewCanvas.getContext("2d");
+  var last = 0;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (!previewOverlay.classList.contains("open") || !currentPreviewFav) return;
+    if (now - last < 33) return;
+    last = now;
+    var fn = new Function("x", "t", themed(currentPreviewFav.body));
+    x.clearRect(0, 0, 64, 64);
+    fn(x, now / 1000);
+  }
+  requestAnimationFrame(loop);
+})();
 
 /* ---------- 7. Clipboard + toast -------------------------------------------- */
 var toast = document.getElementById("toast");

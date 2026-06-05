@@ -76,6 +76,46 @@
     </div>
   </div>
 
+  <!-- Tab preview modal: shows the favicon live in a mock browser window -->
+  <div class="overlay" id="previewOverlay">
+    <div class="preview-modal">
+      <div class="modal-head">
+        <div class="mh-text">
+          <h3>Tab preview</h3>
+          <span>See your favicon live in a browser tab</span>
+        </div>
+        <button class="close" id="previewClose" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="preview-body">
+        <!-- Mock browser window -->
+        <div class="browser">
+          <div class="browser-chrome">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <div class="tabs">
+              <div class="tab active">
+                <canvas id="previewCanvas" width="64" height="64"></canvas>
+                <span class="t-title" id="previewTabTitle">My Site</span>
+                <span class="t-x">&times;</span>
+              </div>
+              <div class="tab ghost">
+                <span class="t-title">New Tab</span>
+              </div>
+            </div>
+          </div>
+          <div class="addressbar"><span id="previewAddr">https://my-site.com</span></div>
+          <div class="viewport">Your site preview</div>
+        </div>
+
+        <!-- Editable site name -->
+        <label class="preview-field">
+          <span>Site name</span>
+          <input id="previewInput" type="text" value="My Site" placeholder="Enter your site name" autocomplete="off" />
+        </label>
+      </div>
+    </div>
+  </div>
+
   <!-- Transient "Copied ✓" confirmation -->
   <div class="toast" id="toast">Copied to clipboard ✓</div>
 
