@@ -18,6 +18,16 @@
 <title>tabmotion — animated favicons</title>
 <meta name="description" content="A minimal library of modern, animated, copy-paste favicons for the browser tab." />
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VZYKM49865"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VZYKM49865');
+</script>
+
 <!-- Fonts: Inter for UI, JetBrains Mono for the code view -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -128,5 +138,11 @@
 
   <!-- Behavior -->
   <script src="app.js"></script>
+
+  <!-- Vercel Web Analytics (served by Vercel when Analytics is enabled) -->
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
