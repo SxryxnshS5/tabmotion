@@ -324,6 +324,117 @@ var FAVICONS = [
 "  x.fillStyle = g;\n" +
 "  x.fill();\n" +
 "  x.restore();"
+  },
+  {
+    id: "loaderdots",
+    name: "Loader Dots",
+    category: "Loading",
+    desc: "Eight dots chasing around a ring with a fading tail. A timeless spinner.",
+    body:
+"  var cx = 32, cy = 32, R = 20, n = 8, i, a, d;\n" +
+"  for (i = 0; i < n; i++) {\n" +
+"    a = (i / n) * Math.PI * 2 - Math.PI / 2;\n" +
+"    d = ((t * 1.2 - i / n) % 1 + 1) % 1;\n" +
+"    x.beginPath();\n" +
+"    x.arc(cx + Math.cos(a) * R, cy + Math.sin(a) * R, 5, 0, 7);\n" +
+"    x.fillStyle = 'rgba(168,85,247,' + (0.15 + (1 - d) * 0.85) + ')';\n" +
+"    x.fill();\n" +
+"  }"
+  },
+  {
+    id: "gyro",
+    name: "Gyro",
+    category: "Loading",
+    desc: "Three concentric arcs spinning at different speeds and directions.",
+    body:
+"  var cx = 32, cy = 32;\n" +
+"  x.lineWidth = 4;\n" +
+"  x.lineCap = 'round';\n" +
+"  x.strokeStyle = '#a855f7';\n" +
+"  x.beginPath(); x.arc(cx, cy, 22, t * 3, t * 3 + 2.2); x.stroke();\n" +
+"  x.strokeStyle = '#c084fc';\n" +
+"  x.beginPath(); x.arc(cx, cy, 15, -t * 4 + 1, -t * 4 + 3.4); x.stroke();\n" +
+"  x.strokeStyle = '#7c3aed';\n" +
+"  x.beginPath(); x.arc(cx, cy, 8, t * 5, t * 5 + 2.6); x.stroke();"
+  },
+  {
+    id: "wifi",
+    name: "Signal",
+    category: "Notification",
+    desc: "Stacked arcs lighting up like a connecting Wi-Fi / signal indicator.",
+    body:
+"  var cx = 32, cy = 44, i, on;\n" +
+"  x.lineWidth = 5;\n" +
+"  x.lineCap = 'round';\n" +
+"  var ph = (t * 1.2) % 3;\n" +
+"  for (i = 0; i < 3; i++) {\n" +
+"    on = ph > i ? 1 : 0.18;\n" +
+"    x.strokeStyle = 'rgba(168,85,247,' + on + ')';\n" +
+"    x.beginPath();\n" +
+"    x.arc(cx, cy, 10 + i * 10, -Math.PI * 0.75, -Math.PI * 0.25);\n" +
+"    x.stroke();\n" +
+"  }\n" +
+"  x.beginPath(); x.arc(cx, cy, 4, 0, 7); x.fillStyle = '#a855f7'; x.fill();"
+  },
+  {
+    id: "pie",
+    name: "Pie",
+    category: "Loading",
+    desc: "A sector that sweeps around to fill a disc, then loops. Clean progress.",
+    body:
+"  var cx = 32, cy = 32, r = 22;\n" +
+"  x.beginPath();\n" +
+"  x.arc(cx, cy, r, 0, 7);\n" +
+"  x.strokeStyle = 'rgba(168,85,247,0.2)';\n" +
+"  x.lineWidth = 3;\n" +
+"  x.stroke();\n" +
+"  var p = (t * 0.45) % 1;\n" +
+"  x.beginPath();\n" +
+"  x.moveTo(cx, cy);\n" +
+"  x.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2);\n" +
+"  x.closePath();\n" +
+"  x.fillStyle = '#a855f7';\n" +
+"  x.fill();"
+  },
+  {
+    id: "star",
+    name: "Star",
+    category: "Fun",
+    desc: "A five-point star slowly spinning with a gentle twinkle. Playful sparkle.",
+    body:
+"  var i, a, a2;\n" +
+"  var s = 0.85 + Math.abs(Math.sin(t * 2)) * 0.15;\n" +
+"  x.save();\n" +
+"  x.translate(32, 32);\n" +
+"  x.rotate(t * 0.8);\n" +
+"  x.scale(s, s);\n" +
+"  x.beginPath();\n" +
+"  for (i = 0; i < 5; i++) {\n" +
+"    a = -Math.PI / 2 + i * 2 * Math.PI / 5;\n" +
+"    a2 = a + Math.PI / 5;\n" +
+"    x.lineTo(Math.cos(a) * 22, Math.sin(a) * 22);\n" +
+"    x.lineTo(Math.cos(a2) * 9, Math.sin(a2) * 9);\n" +
+"  }\n" +
+"  x.closePath();\n" +
+"  x.fillStyle = '#a855f7';\n" +
+"  x.fill();\n" +
+"  x.restore();"
+  },
+  {
+    id: "flip",
+    name: "Flip",
+    category: "Fun",
+    desc: "A rounded card flipping on its axis, showing a darker back face. Snappy.",
+    body:
+"  var sx = Math.cos(t * 2.5);\n" +
+"  x.save();\n" +
+"  x.translate(32, 32);\n" +
+"  x.scale(sx, 1);\n" +
+"  x.beginPath();\n" +
+"  x.roundRect(-18, -18, 36, 36, 9);\n" +
+"  x.fillStyle = sx >= 0 ? '#a855f7' : '#7c3aed';\n" +
+"  x.fill();\n" +
+"  x.restore();"
   }
 ];
 

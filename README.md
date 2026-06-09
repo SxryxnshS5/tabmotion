@@ -10,7 +10,7 @@ No build step. No dependencies. Just three static files.
 
 ## Features
 
-- **14 animated favicons** across categories: Brand, Loading, Notification, Fun, Media.
+- **20 animated favicons** across categories: Brand, Loading, Notification, Fun, Media.
 - **Live previews** — every favicon animates right in its card, inside a faux browser tab.
 - **Search & category filters** to find a favicon fast.
 - **Pagination** that fills complete rows and adapts to the viewport width.
@@ -21,6 +21,20 @@ No build step. No dependencies. Just three static files.
 - **Copy‑paste ready** — the generated `<script>` is fully self‑contained; paste
   it into your `<head>` and it just works.
 - **Eats its own dog food** — the site's own favicon is one of the library entries.
+
+---
+
+## Favicon catalog
+
+20 favicons, grouped by category:
+
+| Category | Favicons |
+| --- | --- |
+| **Brand** | tabmotion |
+| **Loading** | Spinner · Orbit · Progress Ring · Typing Dots · Clock · Loader Dots · Gyro · Pie |
+| **Notification** | Pulse · Radar · Signal |
+| **Fun** | Bounce · Heartbeat · Comet · Morph · Star · Flip |
+| **Media** | Equalizer · Wave |
 
 ---
 
